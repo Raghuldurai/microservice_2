@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: login-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: login-backend
+  template:
+    metadata:
+      labels:
+        app: login-backend
+    spec:
+      containers:
+      - name: login-backend
+        image: login-backend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5001
+        env:
+        - name: PORT
+          value: "5001"
+        - name: MONGO_URI
+          value: mongodb://mongo:27017/login-service
+        - name: JWT_SECRET
+          value: supersecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: login-backend
+spec:
+  selector:
+    app: login-backend
+  ports:
+  - port: 5001
+    targetPort: 5001

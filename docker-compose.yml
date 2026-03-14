@@ -1,0 +1,83 @@
+services:
+
+  nginx:
+    image: nginx:latest
+    container_name: store-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      login-frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+      home-frontend:
+        condition: service_healthy
+      home-service:
+        condition: service_healthy
+
+  login-frontend:
+    build: ./login-service/frontend
+    container_name: login-frontend
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  backend:
+    build: ./login-service/backend
+    container_name: login-backend
+    env_file:
+      - ./login-service/.env
+    expose:
+      - "5001"
+    depends_on:
+      - mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  home-frontend:
+    build: ./home-service/frontend
+    container_name: home-frontend
+    expose:
+      - "3001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  home-service:
+    build: ./home-service/backend
+    container_name: home-service
+    env_file:
+      - ./home-service/.env
+    expose:
+      - "5002"
+    depends_on:
+      - mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  mongo:
+    image: mongo:7
+    container_name: store-mongo
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: home-frontend
+  template:
+    metadata:
+      labels:
+        app: home-frontend
+    spec:
+      containers:
+      - name: home-frontend
+        image: home-frontend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-frontend
+spec:
+  selector:
+    app: home-frontend
+  ports:
+  - port: 3001
+    targetPort: 3001

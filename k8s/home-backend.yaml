@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: home-backend
+  template:
+    metadata:
+      labels:
+        app: home-backend
+    spec:
+      containers:
+      - name: home-backend
+        image: home-backend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5002
+        env:
+        - name: PORT
+          value: "5002"
+        - name: MONGO_URI
+          value: mongodb://mongo:27017/home-service
+        - name: JWT_SECRET
+          value: supersecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-backend
+spec:
+  selector:
+    app: home-backend
+  ports:
+  - port: 5002
+    targetPort: 5002

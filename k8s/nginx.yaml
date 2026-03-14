@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    events {}
+
+    http {
+
+      resolver kube-dns.kube-system.svc.cluster.local;
+
+      server {
+        listen 80;
+
+        location /api/products {
+          proxy_pass http://home-backend:5002;
+        }
+
+        location /api {
+          proxy_pass http://login-backend:5001;
+        }
+
+        location /home/ {
+          proxy_pass http://home-frontend:3001;
+        }
+
+        location / {
+          proxy_pass http://login-frontend:3000;
+        }
+      }
+    }
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: store-nginx
+  template:
+    metadata:
+      labels:
+        app: store-nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config-volume
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-config-volume
+          configMap:
+            name: nginx-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: store-nginx
+spec:
+  selector:
+    app: store-nginx
+  ports:
+    - port: 80
+      targetPort: 80
+  type: NodePort
