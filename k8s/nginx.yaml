@@ -22,6 +22,7 @@ data:
         }
 
         location /home/ {
+          rewrite ^/home/(.*)$ /$1 break;
           proxy_pass http://home-frontend:3001;
         }
 

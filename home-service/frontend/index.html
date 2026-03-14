@@ -473,7 +473,7 @@
       grid.innerHTML = products.map(p => `
         <div class="card">
           ${p.image
-            ? `<img class="card-img" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+            ? `<img class="card-img" src="/images/${p.image}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
             : ""}
           <div class="card-img-placeholder" ${p.image ? 'style="display:none"' : ""}>🛍️</div>
           <div class="card-body">
